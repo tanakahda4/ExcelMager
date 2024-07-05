@@ -1,3 +1,7 @@
+/*
+ * Copyright © 2024 tanakahda. All rights reserved.
+ * https://github.com/tanakahda4/ExcelMerger
+ */
 package com.tanakahda;
 
 import java.util.List;

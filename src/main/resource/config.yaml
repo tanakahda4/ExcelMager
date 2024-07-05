@@ -1,4 +1,4 @@
-dest_path : /Users/tanakahda/Desktop/destWorkbook.xlsx
+dest_path : /Users/tanakahda/Desktop/ExcelMerge/DestWorkbook.xlsx
 copy_column: "^(A|B|C).*"
 src_excel_path:
 - /Users/tanakahda/Desktop/ExcelMerge/K00/QA/K00-QA表.xlsx

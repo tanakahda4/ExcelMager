@@ -1,3 +1,7 @@
+/*
+ * Copyright © 2024 tanakahda. All rights reserved.
+ * https://github.com/tanakahda4/ExcelMerger
+ */
 package com.tanakahda;
 
 import java.io.FileInputStream;
@@ -13,23 +17,36 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
+/**
+ * 複数のExcelを１つのシートへマージするユーティリティクラスです。
+ *
+ * @author tanakahda
+ *
+ */
 public class Main {
 
+	/** ログ出力クラス */
+	private static Logger _log = LoggerFactory.getLogger(Main.class);
+	/** 設定ファイルのモデル */
 	private static Config _config = null;
 
 	/**
-	 *
+	 * メインルーティン
 	 * @param args
 	 */
 	public static void main(String[] args) {
 
+		_log.info("処理を開始します。");
+
 		Workbook destWorkbook = new XSSFWorkbook();
 		Sheet destSheet = destWorkbook.createSheet("Sheet1");
-		_config = getConfig("config.yaml");
+		_config = getConfig("src/main/resource/config.yaml");
 
 		List<String> srcPaths = _config.getSrcExcelPath();
 
@@ -41,11 +58,11 @@ public class Main {
 				FileInputStream fis = new FileInputStream(dir);
 				XSSFWorkbook srcWorkbook = new XSSFWorkbook(fis);
 				Sheet srcSheet = srcWorkbook.getSheetAt(0);
-
 				execSheet(destSheet, srcSheet);
 				srcWorkbook.close();
 			} catch (IOException e) {
 				e.printStackTrace();
+				_log.error(e.getMessage() + "：" + dir + "の転記に失敗したためスキップしました。");
 			}
 		}
 
@@ -53,18 +70,23 @@ public class Main {
 			destWorkbook.write(out);
 		} catch (IOException e) {
 			e.printStackTrace();
+			_log.error(e.getMessage() + "：転記先のブックの出力に失敗しました。");
+			_log.error("転記先のブック：" + _config.getDestPath());
 		}
 
 		try {
 			destWorkbook.close();
 		} catch (IOException e) {
 			e.printStackTrace();
+			_log.warn(e.getMessage());
 		}
+
+		_log.info("処理を終了しました。");
 	}
 
 	/**
-	 * コンフィグファイルの値を取得する
-	 * @return
+	 * 設定ファイルのモデルクラスを取得します。
+	 * @return 設定ファイル
 	 */
 	private static Config getConfig(String path) {
 		String yaml;
@@ -80,9 +102,9 @@ public class Main {
 	}
 
 	/**
-	 * シートの処理を実行
-	 * @param destSheet
-	 * @param srcSheet
+	 * シートの処理を実行します。
+	 * @param destSheet 転記先のシート
+	 * @param srcSheet 転記元のシート
 	 */
 	private static void execSheet(Sheet destSheet, Sheet srcSheet) {
 
@@ -101,9 +123,9 @@ public class Main {
 	}
 
 	/**
-	 * 行の処理を実行
-	 * @param destRow
-	 * @param srcRow
+	 * 行の処理を実行します。
+	 * @param destRow 転記先の行
+	 * @param srcRow 転記元の行
 	 */
 	private static void execRow(Row destRow, Row srcRow) {
 		for (int i = 0; i < srcRow.getLastCellNum(); i++) {
@@ -127,9 +149,9 @@ public class Main {
 	}
 
 	/**
-	 * セルの処理を実行（転記）
-	 * @param destCell
-	 * @param srcCell
+	 * セルの処理を実行（転記）します。
+	 * @param destCell 転記先のセル
+	 * @param srcCell 転記元のセル
 	 */
 	private static void execCell(Cell destCell, Cell srcCell) {
 		switch (srcCell.getCellType()) {
